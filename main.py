@@ -14,29 +14,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from google.appengine.ext import db
 import webapp2
 
-html = '''<!DOCTYPE html> 
-<html lang="en"> 
-<head> 
-<meta charset="utf-8" /> 
-<title>Smashing HTML5!</title>  
-<link rel="stylesheet" href="/stylesheets/style.css" type="text/css" />  
-<!--[if IE]> <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-<![endif]--> <!--[if lte IE 7]> <script src="js/IE8.js" type="text/javascript"></script>
-<![endif]--> <!--[if lt IE 7]>  <link rel="stylesheet" type="text/css" media="all" href="css/ie6.css"/>
-<![endif]--> 
-</head>  
-<body> 
-<h1>HELLO WORLD</h1>
-</body> 
-</html>
-'''
+class Greeting(db.Model):
+    content = db.StringProperty(multiline=True)
+    date = db.DateTimeProperty(auto_now_add=True)
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write(html)
+        self.response.write('<h1>Hello world!<h1>')
+        self.response.write('<h3>My GuestBook</h3><ol>')
+        #greetings = db.GqlQuery("SELECT * FROM Greeting")
+        greetings = Greeting.all()
+        for greeting in greetings:
+            self.response.write('<li> %s' % greeting.content + '</li>')
+        self.response.write('''
+            </ol><hr>
+            <form action="/sign" method=post>
+            <textarea name=content rows=3 cols=60></textarea>
+            <br><input type=submit value="Sign Guestbook">
+            </form>
+        ''')
+
+class GuestBook(webapp2.RequestHandler):
+    def post(self):
+        greeting = Greeting()
+        greeting.content = self.request.get('content')
+        greeting.put()
+        self.redirect('/')
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('/sign', GuestBook),
 ], debug=True)
+
+

@@ -27,3 +27,16 @@ libraries:
 
 - name: yaml
   version: "latest"
+  
+- name: jinja2
+  version: "latest"
+  
+- name: PIL
+  version: "1.1.7"  
+
+- name: numpy
+  version: "latest"
+
+
+builtins:
+#- datastore_admin: on
